@@ -20,8 +20,6 @@ class Command(BaseCommand):
         log_level = verbosity_map[int(options['verbosity'])]
         logging.basicConfig(level=log_level)
         
-        print log_level
-        
         for rel_path, abs_path in gen_all_templates():
             pass
 
