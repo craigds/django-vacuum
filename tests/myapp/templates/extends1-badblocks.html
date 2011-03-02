@@ -1,0 +1,10 @@
+{% extends "extends1.html" %}
+{% block foo %}
+    (this bit's fine)
+{% endblock foo %}
+
+Child templates with like this outside of blocks are bad.
+
+{% comment %}
+    BUT: comments are fine
+{% endcomment %}
