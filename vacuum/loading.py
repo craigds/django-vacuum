@@ -50,7 +50,7 @@ def gen_loader_templates(l):
     else:
         #TODO EggsLoader (any others?)
         # TODO: should probably just raise a warning here, since any other loaders in settings will work fine.
-        raise ValueError("django-tc doesn't support this loader: %s" % l.__class__.__name__)
+        raise ValueError("django-vacuum doesn't support this loader: %s" % l.__class__.__name__)
     
     for tupl in gen(l):
         yield tupl

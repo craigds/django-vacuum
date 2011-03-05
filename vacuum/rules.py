@@ -2,7 +2,7 @@ import logging
 
 from django.template import base, loader_tags, defaulttags
 
-from tc import utils
+from vacuum import utils
 
 registered_rules = []
 

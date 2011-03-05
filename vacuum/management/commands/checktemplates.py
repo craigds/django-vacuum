@@ -3,7 +3,7 @@ from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
 
-from tc.loading import gen_all_templates
+from vacuum.loading import gen_all_templates
 
 verbosity_map = {
     0: logging.ERROR,

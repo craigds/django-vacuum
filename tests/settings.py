@@ -3,7 +3,7 @@ DATABASE_ENGINE = 'sqlite3'
 
 INSTALLED_APPS = [
     'myapp',
-    'tc',
+    'vacuum',
 ]
 
 TEMPLATE_LOADERS = (

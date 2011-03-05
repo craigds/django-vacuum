@@ -4,8 +4,8 @@ import logging
 from django.template import Template
 from django.test import TestCase
 
-from tc.loading import gen_all_templates
-from tc import checker, rules
+from vacuum.loading import gen_all_templates
+from vacuum import checker, rules
 
 class TestLoading(TestCase):
     def test_app_directories_loader(self):

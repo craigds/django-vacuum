@@ -1,6 +1,6 @@
 from django.template import loader, base, Template
 
-from tc.rules import registered_rules
+from vacuum.rules import registered_rules
 
 class TemplateChecker(object):
     
