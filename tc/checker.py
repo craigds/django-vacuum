@@ -21,34 +21,30 @@ class TemplateChecker(object):
         
         rules = [r(self, template) for r in self.registered_rules]
     
-        # breadth-first search of the template nodes
+        # depth-first search of the template nodes
         #TODO should probably use deque, since we're doing popleft() a lot?
-        nodes = template.nodelist[:]
+        nodes = template.nodelist
         
-        # set parent nodes, so rules can traverse up the hierarchy if they want
-        for n in nodes:
-            n.parent = None
-        
-        while nodes:
-            node = nodes.pop(0)
-            
-            children = []
+        self._recursive_check(nodes, [], rules)
+    
+    def _recursive_check(self, nodes, ancestors, rules):
+        for node in nodes:
+            node.parent = ancestors[-1] if ancestors else None
+            children = None
             if isinstance(node, base.TextNode):
                 if not node.s.strip():
                     # skip further processing for blank text nodes
                     continue
             elif getattr(node, 'nodelist', None):
-                children = node.nodelist[:]
-                for child in children:
-                    child.parent = node
+                children = node.nodelist
             
             valid = True
             for rule in rules:
                 if rule.visit_node(node) is False:
                     valid = False
                     rule.log(node)
-            if valid:
-                nodes.extend(children)
+            if valid and children:
+                self._recursive_check(children, ancestors+[node], rules)
     
     def _log(self, level, node, message):
         # TODO get line number of node in template somehow
@@ -126,4 +122,4 @@ class TextOutsideBlocksInExtended(Rule):
                     return False
     
     def log(self, node):
-        self.checker.warn(node, 'Non-empty text node outside of blocks in extended template')
+        self.checker.warn(node, 'Text outside of blocks in extended template')
