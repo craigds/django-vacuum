@@ -1,5 +1,5 @@
-django-tc
----------
+django-vacuum
+-------------
 
 Copyright (c) 2011, Craig de Stigter
 

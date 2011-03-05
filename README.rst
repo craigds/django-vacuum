@@ -1,4 +1,4 @@
-django-tc - a template checker for Django
------------------------------------------
+django-vauum - Sucks the lint from your Django templates
+--------------------------------------------------------
 
-It doesn't actually do anything yet, so don't get too excited.
+It's pretty minimal right now, so don't get too excited.
