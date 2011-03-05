@@ -39,7 +39,7 @@ class TemplatesTestCase(TestCase):
 
 class TestBlocks(TemplatesTestCase):
     rules = [
-        rules.TextOutsideBlocksInExtended, rules.RootLevelBlockTagsInExtended
+        rules.TextOutsideBlocksInExtended, rules.NonexistentBlockTagsInExtended
     ]
     def test_happy_templates(self):
         for t in ['base1.html', 'extends1.html']:

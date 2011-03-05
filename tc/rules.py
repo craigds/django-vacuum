@@ -2,6 +2,8 @@ import logging
 
 from django.template import base, loader_tags, defaulttags
 
+from tc import utils
+
 registered_rules = []
 
 class RuleMeta(type):
@@ -119,22 +121,54 @@ class TextOutsideBlocksInExtended(Rule):
                     self.warn(node, "Text outside of blocks in extended template: '%s'" % self.format_node(node))
                     return False
 
-class RootLevelBlockTagsInExtended(Rule):
+
+class NonexistentBlockTagsInExtended(Rule):
     """
     If there are root level block tags in an extended template, they should
     also be in a parent template. Otherwise, they'll never be rendered.
+    
+    This includes checks for inheritance of overridden blocks, e.g.:
+        base.html:
+            {% block foo %}{% block bar %}{% endblock %}{% endblock %}
+        one.html:
+            {% extends "base.html" %}{% block foo %}{% endblock %}
+        two.html:
+            {% extends "one.html" %}{% block bar %}{% endblock %}   <-- bad
     """
     def __init__(self, *args, **kwargs):
-        super(RootLevelBlockTagsInExtended, self).__init__(*args, **kwargs)
-        self._blocks_in_ancestors = set()
+        super(NonexistentBlockTagsInExtended, self).__init__(*args, **kwargs)
+        self._blocks_in_ancestors = {
+            # 'blockname' : {
+            #    'childblock': {}
+            # }
+        }
     
     def visit_node_in_ancestor(self, node):
         if isinstance(node, loader_tags.BlockNode):
-            self._blocks_in_ancestors.add(node.name)
+            ancestor_blocks = filter(lambda n: isinstance(n, loader_tags.BlockNode), utils.get_ancestors(node))
+            
+            context = self._blocks_in_ancestors
+            for block in ancestor_blocks:
+                context = context[block.name]
+            context[node.name] = {}
+    
+    def _get_ancestor_block_names(self, block_dict=None):
+        names = set()
+        if block_dict is None:
+            block_dict = self._blocks_in_ancestors
+        
+        for k, v in block_dict.items():
+            names.add(k)
+            if v:
+                names.update(self._get_ancestor_block_names(v))
+        return names
     
     def visit_node(self, node):
         if self.ancestor_templates:
-            if isinstance(node, loader_tags.BlockNode) and isinstance(node.parent, loader_tags.ExtendsNode):
-                if node.name not in self._blocks_in_ancestors:
+            if isinstance(node, loader_tags.BlockNode):
+                if node.name not in self._get_ancestor_block_names():
                     self.warn(node, "Root-level block ('%s') doesn't match any blocks in parent templates" % node.name)
-                    return False
+                # only process root-level blocks
+                return False
+                
+                
