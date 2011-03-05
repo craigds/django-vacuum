@@ -5,10 +5,6 @@ from django.template import loader, base, loader_tags, defaulttags
 class TemplateChecker(object):
     registered_rules = []
     
-    def __init__(self):
-        self.warnings = []
-        self.errors = []
-    
     def check_template(self, path):
         """
         Checks the given template for badness.
@@ -45,21 +41,6 @@ class TemplateChecker(object):
                     rule.log(node)
             if valid and children:
                 self._recursive_check(children, ancestors+[node], rules)
-    
-    def _log(self, level, node, message):
-        # TODO get line number of node in template somehow
-        logging.log(level, message)
-    
-    def info(self, node, message):
-        self._log(logging.INFO, node, message)
-    
-    def warn(self, node, message):
-        self.warnings.append(message)
-        self._log(logging.WARN, node, message)
-    
-    def error(self, node, message):
-        self.errors.append(message)
-        self._log(logging.ERROR, node, message)
 
 
 ### RULES - base classes
@@ -99,6 +80,24 @@ class Rule(object):
         """
         return None
     
+    def format_node(self, node):
+        if isinstance(node, base.TextNode):
+            return node.s.strip()
+        return unicode(node)
+    
+    def _log(self, level, node, message):
+        # TODO get line number of node in template somehow
+        logging.log(level, u'%s: %s' % (message, self.format_node(node)))
+    
+    def info(self, node, message):
+        self._log(logging.INFO, node, message)
+    
+    def warn(self, node, message):
+        self._log(logging.WARN, node, message)
+    
+    def error(self, node, message):
+        self._log(logging.ERROR, node, message)
+    
     def log(self, node):
         """
         Must be implemented to log an error or warning for the node.
@@ -122,4 +121,4 @@ class TextOutsideBlocksInExtended(Rule):
                     return False
     
     def log(self, node):
-        self.checker.warn(node, 'Text outside of blocks in extended template')
+        self.warn(node, 'Text outside of blocks in extended template')
