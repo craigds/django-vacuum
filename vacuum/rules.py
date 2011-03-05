@@ -170,5 +170,3 @@ class NonexistentBlockTagsInExtended(Rule):
                     self.warn(node, "Root-level block ('%s') doesn't match any blocks in parent templates" % node.name)
                 # only process root-level blocks
                 return False
-                
-                

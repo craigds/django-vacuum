@@ -1,4 +1,3 @@
-import collections
 import logging
 
 from django.template import Template
@@ -57,12 +56,6 @@ class TestBlocks(TemplatesTestCase):
             {% extends "base1.html" %}{% block nonexistent %}this is bad{% endblock %}
         """))
         self.assertEqual(self.log_levels, [logging.WARN])
-    
-    def test_good_root_level_block(self):
-        self.checker.check_template(Template("""
-            {% extends "base1.html" %}{% block foo %}this is good{% endblock %}
-        """))
-        self.assertEqual(self.log_levels, [])
     
     def test_good_root_level_block(self):
         self.checker.check_template(Template("""

@@ -1,7 +1,6 @@
 import logging
-from optparse import make_option
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from vacuum.loading import gen_all_templates
 
