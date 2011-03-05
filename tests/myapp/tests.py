@@ -37,7 +37,7 @@ class TemplatesTestCase(TestCase):
         if self.rules is not None:
             self.checker.registered_rules = self.rules
 
-class TestBaseBlocks(TemplatesTestCase):
+class TestBlocks(TemplatesTestCase):
     rules = [
         checker.TextOutsideBlocksInExtended, checker.RootLevelBlockTagsInExtended
     ]
@@ -54,7 +54,32 @@ class TestBaseBlocks(TemplatesTestCase):
     
     def test_bad_root_level_block(self):
         self.checker.check_template(Template("""
-            {% extends "base1.html" %}
-            {% block nonexistent %}this is bad{% endblock %}
+            {% extends "base1.html" %}{% block nonexistent %}this is bad{% endblock %}
+        """))
+        self.assertEqual(self.log_levels, [logging.WARN])
+    
+    def test_good_root_level_block(self):
+        self.checker.check_template(Template("""
+            {% extends "base1.html" %}{% block foo %}this is good{% endblock %}
+        """))
+        self.assertEqual(self.log_levels, [])
+    
+    def test_good_root_level_block(self):
+        self.checker.check_template(Template("""
+            {% extends "base1.html" %}{% block foo %}this is okay{% endblock %}
+        """))
+        self.assertEqual(self.log_levels, [])
+
+    def test_extending_nonroot_block(self):
+        self.checker.check_template(Template("""
+            {% extends "base1.html" %}{% block bar %}this is okay{% endblock %}
+        """))
+        self.assertEqual(self.log_levels, [])
+
+    def test_root_level_overridden_block(self):
+        # extends1.html overrides block 'foo', so 'bar' doesnt exist anymore
+        self.checker.check_template(Template("""
+            {% extends "extends1.html" %}
+            {% block bar %}this is bad{% endblock %}
         """))
         self.assertEqual(self.log_levels, [logging.WARN])

@@ -39,9 +39,10 @@ class TemplateChecker(object):
             
             valid = True
             for rule in rules:
+                if rule.finished:
+                    continue
                 if rule.visit_node(node) is False:
                     valid = False
-                    rule.log(node)
             if valid and children:
                 self._recursive_check(children, ancestors+[node], rules)
 
@@ -74,6 +75,7 @@ class Rule(object):
     
     def __init__(self, template):
         self.template = template
+        self.finished = False
         
         # navigate up the template hierarchy and determine ancestors
         self.ancestor_templates = []
@@ -124,6 +126,7 @@ class Rule(object):
         """
         Returns whether a node is valid in the current context.
         If False, the node's children will not be processed.
+        This method should also call self.warn/error/etc if it finds anything invalid.
         """
         return None
     
@@ -134,7 +137,7 @@ class Rule(object):
     
     def _log(self, level, node, message):
         # TODO get line number of node in template somehow
-        logging.log(level, u'%s: %s' % (message, self.format_node(node)))
+        logging.log(level, message)
     
     def info(self, node, message):
         self._log(logging.INFO, node, message)
@@ -144,13 +147,6 @@ class Rule(object):
     
     def error(self, node, message):
         self._log(logging.ERROR, node, message)
-    
-    def log(self, node):
-        """
-        Must be implemented to log an error or warning for the node.
-        This is only called if visit_node() returns False.
-        """
-        raise NotImplementedError
 
 ### RULES - actual rules
 
@@ -164,10 +160,8 @@ class TextOutsideBlocksInExtended(Rule):
         if self.ancestor_templates:
             if not isinstance(node, (loader_tags.BlockNode, defaulttags.LoadNode, defaulttags.CommentNode)):
                 if isinstance(node.parent, loader_tags.ExtendsNode):
+                    self.warn(node, "Text outside of blocks in extended template: '%s'" % self.format_node(node))
                     return False
-    
-    def log(self, node):
-        self.warn(node, 'Text outside of blocks in extended template')
 
 class RootLevelBlockTagsInExtended(Rule):
     """
@@ -186,8 +180,5 @@ class RootLevelBlockTagsInExtended(Rule):
         if self.ancestor_templates:
             if isinstance(node, loader_tags.BlockNode) and isinstance(node.parent, loader_tags.ExtendsNode):
                 if node.name not in self._blocks_in_ancestors:
+                    self.warn(node, "Root-level block ('%s') doesn't match any blocks in parent templates" % node.name)
                     return False
-    
-    def log(self, node):
-        self.warn(node, "Root-level block in extended template doesn't match any blocks in parent templates")
-    

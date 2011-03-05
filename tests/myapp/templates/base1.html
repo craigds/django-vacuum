@@ -2,5 +2,8 @@
     This is a basic base template with no problems.
     {% block foo %}
         content
+        {% block bar %}
+            Here's a non-root block
+        {% endblock bar %}
     {% endblock foo %}
 </html>
