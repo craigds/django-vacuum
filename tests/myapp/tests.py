@@ -5,7 +5,7 @@ from django.template import Template
 from django.test import TestCase
 
 from tc.loading import gen_all_templates
-from tc import checker
+from tc import checker, rules
 
 class TestLoading(TestCase):
     def test_app_directories_loader(self):
@@ -23,13 +23,13 @@ class TemplatesTestCase(TestCase):
         self.log_nodes = []
         
         # patch Rule so we know what's logged
-        original_rule_log = checker.Rule._log
+        original_rule_log = rules.Rule._log
         def _rule_log(rule, level, node, message):
             self.log_levels.append(level)
             self.log_messages.append(message)
             self.log_nodes.append(node)
             original_rule_log(rule, level, node, message)
-        checker.Rule._log = _rule_log
+        rules.Rule._log = _rule_log
         
         self.checker = checker.TemplateChecker()
         
@@ -39,7 +39,7 @@ class TemplatesTestCase(TestCase):
 
 class TestBlocks(TemplatesTestCase):
     rules = [
-        checker.TextOutsideBlocksInExtended, checker.RootLevelBlockTagsInExtended
+        rules.TextOutsideBlocksInExtended, rules.RootLevelBlockTagsInExtended
     ]
     def test_happy_templates(self):
         for t in ['base1.html', 'extends1.html']:
