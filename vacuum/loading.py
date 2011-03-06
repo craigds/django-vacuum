@@ -69,7 +69,14 @@ def _gen_FS_templates(l, template_dirs=settings.TEMPLATE_DIRS):
     """
     for template_dir in template_dirs:
         logging.info('Looking in template directory %r' % template_dir)
-        for path, dirs, files in os.walk(template_dir, followlinks=True):
+        try:
+            gen = os.walk(template_dir, followlinks=True)
+        except TypeError:
+            # followlinks kwarg is new in python 2.6
+            # TODO : follow symlinks anyway
+            gen = os.walk(template_dir)
+        
+        for path, dirs, files in gen:
             for f in files:
                 abs_path = os.path.join(path, f)
                 rel_path = abs_path[len(template_dir):]
