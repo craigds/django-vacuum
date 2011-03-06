@@ -1,4 +1,6 @@
-from django.template import loader, base, Template
+import logging
+
+from django.template import loader, Template, TemplateDoesNotExist, TemplateSyntaxError, TextNode
 
 from vacuum.rules import registered_rules
 
@@ -11,8 +13,8 @@ class TemplateChecker(object):
         if not isinstance(template, Template):
             try:
                 template = loader.get_template(template)
-            except (base.TemplateSyntaxError, base.TemplateDoesNotExist), e:
-                self.errors.append(e)
+            except (TemplateSyntaxError, TemplateDoesNotExist), e:
+                logging.error("Couldn't load template: '%s' (%s)" % (template, e))
                 return
         
         rules = [r(template) for r in registered_rules]
@@ -29,7 +31,7 @@ class TemplateChecker(object):
         for node in nodes:
             node.parent = ancestors[-1] if ancestors else None
             children = None
-            if isinstance(node, base.TextNode):
+            if isinstance(node, TextNode):
                 if not node.s.strip():
                     # skip further processing for blank text nodes
                     continue

@@ -14,4 +14,7 @@ setup(name='django-vacuum',
         'vacuum.management',
         'vacuum.management.commands',
     ],
+    package_data={
+        'vacuum': ['entities.txt'],
+    }
 )

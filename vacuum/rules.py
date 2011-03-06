@@ -2,7 +2,7 @@ import logging
 import os
 import re
 
-from django.template import base, loader_tags, defaulttags, defaultfilters
+from django.template import loader_tags, defaulttags, defaultfilters, TextNode
 
 from vacuum import utils
 
@@ -91,7 +91,7 @@ class Rule(object):
         return None
     
     def format_node(self, node):
-        if isinstance(node, base.TextNode):
+        if isinstance(node, TextNode):
             return node.s.strip()
         return unicode(node)
     
@@ -182,7 +182,8 @@ class UnescapedAmpersands(Rule):
     @classmethod
     def _load_entities(cls):
         if not cls.entities:
-            entities = open('entities.txt').read().split()
+            filepath = os.path.join(os.path.split(__file__)[0], 'entities.txt')
+            entities = open(filepath).read().split()
             cls.entities = set(entities)
     
     def __init__(self, *args, **kwargs):
@@ -195,7 +196,7 @@ class UnescapedAmpersands(Rule):
             self.finished = True
     
     def visit_node(self, node):
-        if isinstance(node, base.TextNode):
+        if isinstance(node, TextNode):
             
             notags = defaultfilters.striptags(node.s)
             matches = self.entity_regex.findall(notags)
