@@ -1,6 +1,8 @@
 import logging
+import os
+import re
 
-from django.template import base, loader_tags, defaulttags
+from django.template import base, loader_tags, defaulttags, defaultfilters
 
 from vacuum import utils
 
@@ -170,3 +172,33 @@ class NonexistentBlockTagsInExtended(Rule):
                     self.warn(node, "Root-level block ('%s') doesn't match any blocks in parent templates" % node.name)
                 # only process root-level blocks
                 return False
+
+
+class UnescapedAmpersands(Rule):
+    html_extensions = set(['.html', '.htm'])
+    entity_regex = re.compile(r'&([^\s;]*)')
+    entities = set()
+    
+    @classmethod
+    def _load_entities(cls):
+        if not cls.entities:
+            entities = open('entities.txt').read().split()
+            cls.entities = set(entities)
+    
+    def __init__(self, *args, **kwargs):
+        super(UnescapedAmpersands, self).__init__(*args, **kwargs)
+        self._load_entities()
+        
+        # don't do anything for non-html templates
+        name = self.template.name
+        if not (name and os.path.splitext(name)[-1].lower() in self.html_extensions):
+            self.finished = True
+    
+    def visit_node(self, node):
+        if isinstance(node, base.TextNode):
+            
+            notags = defaultfilters.striptags(node.s)
+            matches = self.entity_regex.findall(notags)
+            for match in matches:
+                if match not in self.entities:
+                    self.warn(node, "Unescaped entity '%s'" % match)

@@ -76,3 +76,29 @@ class TestBlocks(TemplatesTestCase):
             {% block bar %}this is bad{% endblock %}
         """))
         self.assertEqual(self.log_levels, [logging.WARN])
+
+class TestUnescapedAmpersands(TemplatesTestCase):
+    rules = [
+        rules.UnescapedAmpersands,
+    ]
+    def test_empty(self):
+        self.checker.check_template('base1.html')
+        self.assertEqual(self.log_levels, [])
+    
+    def test_non_html_template(self):
+        self.checker.check_template(Template("""
+            This is a text file & ampersands are fine.
+        """))
+        self.assertEqual(self.log_levels, [])
+    
+    def test_valid_html(self):
+        self.checker.check_template(Template("""
+            <html>You, me &amp; a bottle of Highland Park</html>
+        """))
+        self.assertEqual(self.log_levels, [])
+    
+    def test_invalid_html(self):
+        self.checker.check_template(Template("""
+            <html>You, me & a bottle of Highland Park</html>
+        """, name='foo.html'))
+        self.assertEqual(self.log_levels, [logging.WARN])
