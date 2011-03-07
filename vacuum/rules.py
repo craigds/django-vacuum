@@ -29,7 +29,6 @@ class StopProcessingAncestorTemplate(Exception):
 class Rule(object):
     """
     Determines when a node is legal and when it isn't.
-    Nodes are visited in a breadth-first fashion.
     """
     __metaclass__ = RuleMeta
     
