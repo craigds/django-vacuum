@@ -95,18 +95,22 @@ class Rule(object):
             return node.s.strip()
         return unicode(node)
     
-    def _log(self, level, node, message):
-        # TODO get line number of node in template somehow
-        logging.log(level, message)
+    def _log(self, level, node, message, *args, **kwargs):
+        # We'll prefix the message with the template name and block and pass
+        # through any other arguments which message might use for formatting
+        logging.log(level, "%s[%s]: %s" % (self.template.name, node.name,
+                                            message),
+                    extra={"node": node, "template": self.template},
+                    *args, **kwargs)
     
-    def info(self, node, message):
-        self._log(logging.INFO, node, message)
+    def info(self, node, message, *args, **kwargs):
+        self._log(logging.INFO, node, message, *args, **kwargs)
     
-    def warn(self, node, message):
-        self._log(logging.WARN, node, message)
+    def warn(self, node, message, *args, **kwargs):
+        self._log(logging.WARN, node, message, *args, **kwargs)
     
     def error(self, node, message):
-        self._log(logging.ERROR, node, message)
+        self._log(logging.ERROR, node, message, *args, **kwargs)
 
 ### RULES - actual rules
 
