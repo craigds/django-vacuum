@@ -1,0 +1,8 @@
+{% extends "base1.html" %}
+{% block foo %}
+    {% if something %}
+        {% block bar %}
+            This is a basic extends template with no problems.
+        {% endblock bar %}
+    {% endif %}
+{% endblock foo %}

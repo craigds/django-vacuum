@@ -69,6 +69,15 @@ class TestBlocks(TemplatesTestCase):
         """))
         self.assertEqual(self.log_levels, [])
 
+    def test_conditional_extended_nonroot_block(self):
+        """
+        Blocks inside ``if`` tags are a bit nasty to handle...
+        """
+        self.checker.check_template(Template("""
+            {% extends "extends2.html" %}{% block bar %}this is okay{% endblock %}
+        """))
+        self.assertEqual(self.log_levels, [])
+
     def test_root_level_overridden_block(self):
         # extends1.html overrides block 'foo', so 'bar' doesnt exist anymore
         self.checker.check_template(Template("""
