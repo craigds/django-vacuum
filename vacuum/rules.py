@@ -98,7 +98,7 @@ class Rule(object):
     def _log(self, level, node, message, *args, **kwargs):
         # We'll prefix the message with the template name and block and pass
         # through any other arguments which message might use for formatting
-        logging.log(level, "%s[%s]: %s" % (self.template.name, node.name,
+        logging.log(level, "%s[%s]: %s" % (self.template.name, node.__class__.__name__,
                                             message),
                     extra={"node": node, "template": self.template},
                     *args, **kwargs)
