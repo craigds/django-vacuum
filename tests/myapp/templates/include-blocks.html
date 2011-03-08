@@ -1,0 +1,11 @@
+{% block bar %}
+    block bar, included from include-blocks.html
+{% endblock bar %}
+
+{% block baaz %}
+    block baaz, included from include-blocks.html
+    {% block quux %}
+        block quux, included from include-blocks.html
+    {% endblock quux %}
+    {% include "include-blocks2.html" %}
+{% endblock baaz %}

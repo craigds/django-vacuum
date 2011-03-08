@@ -1,0 +1,17 @@
+{% extends "base_include.html" %}
+
+{% block foo %}
+    block foo is defined directly in base_include.html
+{% endblock foo %}
+
+{% block baaz %}
+    base_include.html includes block baaz from include-blocks.html
+{% endblock baaz %}
+
+{% block quux %}
+    The included block baaz has a sub-block named quux
+{% endblock quux %}
+
+{% block corge %}
+    This block is included by include-blocks.html
+{% endblock corge %}
