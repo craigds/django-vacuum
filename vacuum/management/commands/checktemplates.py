@@ -26,4 +26,10 @@ class Command(BaseCommand):
         checker = TemplateChecker()
 
         for rel_path, abs_path in gen_all_templates():
-            checker.check_template(rel_path)
+            try:
+                checker.check_template(rel_path)
+            except (SystemExit, KeyboardInterrupt):
+                raise
+            except Exception, e:
+                logging.error("%s exception while checking template %s: %s",
+                                e.__class__.__name__, abs_path, e)
