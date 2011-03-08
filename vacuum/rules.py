@@ -140,6 +140,7 @@ class NonexistentBlockTagsInExtended(Rule):
         two.html:
             {% extends "one.html" %}{% block bar %}{% endblock %}   <-- bad
     """
+
     def visit_node(self, node):
         if not isinstance(node, loader_tags.BlockNode):
             return
@@ -150,17 +151,28 @@ class NonexistentBlockTagsInExtended(Rule):
         ancestor_block_names = set()
 
         for template in self.ancestor_templates:
-            block_nodes = template.nodelist.get_nodes_by_type(loader_tags.BlockNode)
-            ancestor_block_names.update(i.name for i in block_nodes)
+            names = self._recurse_nodelist(template.nodelist)
 
-            for i in template.nodelist.get_nodes_by_type(loader_tags.ConstantIncludeNode):
-                for block in i.template.nodelist.get_nodes_by_type(loader_tags.BlockNode):
-                    ancestor_block_names.add(block.name)
+            ancestor_block_names.update(names)
+
+            # Remove any blocks which were removed in this template by
+            # overriding their containing block:
+            for name in ancestor_block_names.difference(names):
+                ancestor_block_names.remove(name)
 
         if node.name not in ancestor_block_names:
             self.warn(node, "Root-level block '%s' doesn't match any blocks in parent templates" % node.name)
 
         return False
+
+    def _recurse_nodelist(self, nodelist):
+        block_nodes = nodelist.get_nodes_by_type(loader_tags.BlockNode)
+        names = set(i.name for i in block_nodes)
+
+        for i in nodelist.get_nodes_by_type(loader_tags.ConstantIncludeNode):
+            names.update(self._recurse_nodelist(i.template.nodelist))
+
+        return names
 
 class UnescapedAmpersands(Rule):
     html_extensions = set(['.html', '.htm'])
