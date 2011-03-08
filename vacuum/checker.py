@@ -30,13 +30,14 @@ class TemplateChecker(object):
     def _recursive_check(self, nodes, ancestors, rules):
         for node in nodes:
             node.parent = ancestors[-1] if ancestors else None
-            children = None
             if isinstance(node, TextNode):
                 if not node.s.strip():
                     # skip further processing for blank text nodes
                     continue
-            elif getattr(node, 'nodelist', None):
-                children = node.nodelist
+            
+            children = []
+            for child_nodelist in getattr(node, 'child_nodelists', []):
+                children.extend(getattr(node, child_nodelist, []))
             
             valid = True
             for rule in rules:

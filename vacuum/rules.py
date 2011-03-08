@@ -60,9 +60,9 @@ class Rule(object):
     def _recursive_process_ancestor_template(self, nodes, parent):
         for node in nodes:
             node.parent = parent
-            children = None
-            if getattr(node, 'nodelist', None):
-                children = node.nodelist
+            children = []
+            for child_nodelist in getattr(node, 'child_nodelists', []):
+                children.extend(getattr(node, child_nodelist, []))
             
             if self.visit_node_in_ancestor(node) is False:
                 raise StopProcessingAncestorTemplate
