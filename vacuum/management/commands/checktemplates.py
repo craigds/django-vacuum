@@ -18,8 +18,9 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         log_level = verbosity_map[int(options['verbosity'])]
-        logging.basicConfig(level=log_level)
-        
+        logging.basicConfig(format="%(levelname)s: %(message)s",
+                            level=log_level)
+
         checker = TemplateChecker()
         
         for rel_path, abs_path in gen_all_templates():
