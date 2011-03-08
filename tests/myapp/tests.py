@@ -69,6 +69,11 @@ class TestBlocks(TemplatesTestCase):
         """))
         self.assertEqual(self.log_levels, [])
 
+    def test_override_included_blocks(self):
+        self.checker.check_template("override-included-blocks.html")
+        self.assertEqual(self.log_messages, [])
+        self.assertEqual(self.log_levels, [])
+
     def test_conditional_extended_nonroot_block(self):
         """
         Blocks inside ``if`` tags are a bit nasty to handle...
