@@ -4,6 +4,8 @@ import re
 
 from django.template import loader_tags, defaulttags, defaultfilters, TextNode
 
+# don't pyflakes this out; it monkey-patches django's Template.
+from vacuum import template as _template
 from vacuum import utils
 
 registered_rules = []
@@ -97,8 +99,8 @@ class Rule(object):
     def _log(self, level, node, message, *args, **kwargs):
         # We'll prefix the message with the template name and block and pass
         # through any other arguments which message might use for formatting
-        logging.log(level, "%s[%s]: %s" % (self.template.name, node.__class__.__name__,
-                                            message),
+        logging.log(level, "%s:%d<%s>: %s" % (self.template.name, node.lineno,
+                                              node.__class__.__name__, message),
                     extra={"node": node, "template": self.template},
                     *args, **kwargs)
     
@@ -108,7 +110,7 @@ class Rule(object):
     def warn(self, node, message, *args, **kwargs):
         self._log(logging.WARN, node, message, *args, **kwargs)
     
-    def error(self, node, message):
+    def error(self, node, message, *args, **kwargs):
         self._log(logging.ERROR, node, message, *args, **kwargs)
 
 ### RULES - actual rules
