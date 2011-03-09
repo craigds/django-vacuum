@@ -4,6 +4,7 @@ import os
 from django.conf import settings
 from django.template import loader
 
+
 __all__ = ('gen_all_templates',)
 
 
